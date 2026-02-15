@@ -1,13 +1,3 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
-
-const TABLE_NAME = process.env.LEADS_TABLE_NAME ?? "cbp-leads";
-
-const client = new DynamoDBClient({
-  region: process.env.AWS_REGION ?? "us-east-1",
-});
-const docClient = DynamoDBDocumentClient.from(client);
-
 export interface LeadRow {
   name: string;
   phone: string;
@@ -27,16 +17,13 @@ export async function insertLead(lead: LeadRow) {
   const item = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     created_at: new Date().toISOString(),
-    status: "new",
+    status: "new" as const,
     ...lead,
   };
 
-  await docClient.send(
-    new PutCommand({
-      TableName: TABLE_NAME,
-      Item: item,
-    }),
-  );
+  // Log the lead so it's captured in Vercel's function logs.
+  // You can view all leads at: Vercel Dashboard → your project → Logs
+  console.log("NEW_LEAD:", JSON.stringify(item, null, 2));
 
   return item;
 }
