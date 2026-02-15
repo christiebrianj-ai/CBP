@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
   // Save to DB
   try {
-    insertLead({
+    await insertLead({
       name,
       phone,
       email,
